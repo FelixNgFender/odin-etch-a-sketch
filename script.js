@@ -1,18 +1,17 @@
 const sketchpad = document.querySelector("div.sketchpad");
-// The resolution of the sketchpad (e.g: 16x16),
-// MUST BE a perfect square.
-const RESOLUTION = 16;
-const SIDE_LENGTH = Math.sqrt(RESOLUTION);
+const changeSizeButton = document.querySelector("button.change-size");
+// The resolution of the sketchpad
+let sideLengthPixels = 16;
 const SIDE_LENGTH_INT = sketchpad.clientWidth;
-const PIXEL_LENGTH = SIDE_LENGTH_INT / SIDE_LENGTH;
+let pixelLength = SIDE_LENGTH_INT / sideLengthPixels;
 
 /**
  * Append a 2D array of div's to the sketchpad.
  */
 function createSketchpad() {
-  for (let i = 0; i < SIDE_LENGTH; i++) {
+  for (let i = 0; i < sideLengthPixels; i++) {
     row = createRow();
-    for (let j = 0; j < SIDE_LENGTH; j++) {
+    for (let j = 0; j < sideLengthPixels; j++) {
       pixel = createPixel();
       row.appendChild(pixel);
     }
@@ -26,8 +25,9 @@ function createSketchpad() {
  */
 function createPixel() {
   pixel = document.createElement("div");
-  pixel.style.height = PIXEL_LENGTH;
-  pixel.style.width = PIXEL_LENGTH;
+  pixel.classList.toggle("pixel");
+  pixel.style.flex = "1";
+  pixel.style.border = "solid 1px";
   return pixel;
 }
 
@@ -37,9 +37,68 @@ function createPixel() {
  */
 function createRow() {
   row = document.createElement("div");
-  row.style.height = PIXEL_LENGTH;
-  row.style.width = SIDE_LENGTH_INT;
+  row.classList.toggle("row");
+  row.style.flex = "1";
+  row.style.display = "flex";
   return row;
 }
 
-createSketchpad();
+/**
+ * Clear the sketchpad.
+ */
+ function clearSketchpad() {
+  const pixels = document.querySelectorAll(".pixel");
+  const rows = document.querySelectorAll(".row");
+  pixels.forEach((pixel) => {
+    pixel.remove();
+  });
+  rows.forEach((row) => {
+    row.remove();
+  });
+}
+
+/**
+ * Attach event listeners to all pixels on the sketchpad.
+ */
+function attachEventListenersToPixels() {
+  const pixels = document.querySelectorAll(".pixel");
+  pixels.forEach((pixel) => {
+    pixel.addEventListener("mouseover", () => {
+      pixel.classList.add("hovered");
+    });
+  });
+}
+
+/**
+ * Attach event handler for the size change button.
+ */
+function addSizeChangeHandler() {
+  changeSizeButton.addEventListener("click", () => {
+    sideLengthPixels = parseInt(prompt("Enter sketchpad resolution"));
+    while (
+      isNaN(sideLengthPixels) ||
+      sideLengthPixels > 100 ||
+      sideLengthPixels < 0
+    ) {
+      sideLengthPixels = parseInt(
+        prompt(
+          "The sketchpad resolution should be between 0 and 100. Please re-enter."
+        )
+      );
+    }
+    clearSketchpad();
+    createSketchpad();
+    attachEventListenersToPixels();
+  });
+}
+
+/**
+ * Main driver function.
+ */
+function main() {
+  createSketchpad();
+  attachEventListenersToPixels();
+  addSizeChangeHandler();
+}
+
+main();
